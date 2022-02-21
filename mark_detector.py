@@ -177,3 +177,8 @@ class MarkDetector:
         for mark in marks:
             cv2.circle(image, (int(mark[0]), int(
                 mark[1])), 1, color, -1, cv2.LINE_AA)
+
+    @staticmethod
+    def draw_text(image,label,facebox):
+        cv2.putText(image, label, (facebox[0], facebox[1]),
+            cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0))

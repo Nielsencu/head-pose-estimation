@@ -11,6 +11,7 @@ https://github.com/yinguobing/head-pose-estimation
 from argparse import ArgumentParser
 
 import cv2
+import math
 
 from mark_detector import MarkDetector
 from pose_estimator import PoseEstimator
@@ -26,7 +27,6 @@ parser.add_argument("--cam", type=int, default=None,
                     help="The webcam index.")
 args = parser.parse_args()
 
-
 if __name__ == '__main__':
     # Before estimation started, there are some startup works to do.
 
@@ -37,6 +37,7 @@ if __name__ == '__main__':
         video_src = 0
 
     cap = cv2.VideoCapture(video_src)
+    
 
     # Get the frame size. This will be used by the pose estimator.
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -91,17 +92,28 @@ if __name__ == '__main__':
             # pose on the frame in realtime.
 
             # Do you want to see the pose annotation?
-            pose_estimator.draw_annotation_box(
-                frame, pose[0], pose[1], color=(0, 255, 0))
+            # pose_estimator.draw_annotation_box(
+            #     frame, pose[0], pose[1], color=(0, 255, 0))
 
             # Do you want to see the head axes?
-            # pose_estimator.draw_axes(frame, pose[0], pose[1])
+            pose_estimator.draw_axes(frame, pose[0], pose[1])
+            pose = pose[0]
+            print(f'Rotation around x is {pose[0] * 180 / math.pi}')
+            print(f'Rotation around y is {pose[1] * 180 / math.pi}')
+            print(f'Rotation around z is {pose[2] * 180 / math.pi}')
+            # Convert to angles
+            pose = [i * 180 / math.pi for i in pose]
 
             # Do you want to see the marks?
-            # mark_detector.draw_marks(frame, marks, color=(0, 255, 0))
+            mark_detector.draw_marks(frame, marks, color=(0, 255, 0))
+            x_threshold = 25
+            face_up_y_threshold = 15
+            face_down_y_threshold = 30
+            attentive = 1 if (-x_threshold <= pose[0] <= x_threshold) and (-face_up_y_threshold <= pose[1] <= face_down_y_threshold) else 0
+            mark_detector.draw_text(frame, f'attentive : {attentive}', facebox=facebox)
 
             # Do you want to see the facebox?
-            # mark_detector.draw_box(frame, [facebox])
+            #mark_detector.draw_box(frame, [facebox])
 
         # Show preview.
         cv2.imshow("Preview", frame)
