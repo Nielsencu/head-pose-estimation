@@ -151,10 +151,10 @@ class MarkDetector:
 
     def detect_marks(self, image):
         """Detect facial marks from an face image.
-        
+
         Args:
             image: a face image.
-            
+
         Returns:
             marks: the facial marks as a numpy array of shape [N, 2].
         """
@@ -179,6 +179,12 @@ class MarkDetector:
                 mark[1])), 1, color, -1, cv2.LINE_AA)
 
     @staticmethod
-    def draw_text(image,label,facebox):
-        cv2.putText(image, label, (facebox[0], facebox[1]),
-            cv2.FONT_HERSHEY_SIMPLEX, 1.5, (0, 0, 0))
+    def draw_text(image, label, coords=(50,50)):
+        cv2.putText(
+            img=image,
+            text=label,
+            org=(coords[0], coords[1]),
+            fontFace=cv2.FONT_HERSHEY_SIMPLEX,
+            fontScale=0.8,
+            color=(0, 0, 255),
+        )
