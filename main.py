@@ -13,8 +13,13 @@ from argparse import ArgumentParser
 import cv2
 import math
 
+
 from mark_detector import MarkDetector
 from pose_estimator import PoseEstimator
+
+import time
+
+from imutils import face_utils, resize
 
 print(__doc__)
 print("OpenCV version: {}".format(cv2.__version__))
@@ -27,6 +32,13 @@ parser.add_argument("--cam", type=int, default=None,
                     help="The webcam index.")
 args = parser.parse_args()
 
+# def eye_aspect_ratio(self, eye):
+#     A = distance.euclidean(eye[1], eye[5])
+#     B = distance.euclidean(eye[2], eye[4])
+#     C = distance.euclidean(eye[0], eye[3])
+#     ear = (A + B) / (2.0 * C)
+#     return ear
+
 if __name__ == '__main__':
     # Before estimation started, there are some startup works to do.
 
@@ -37,7 +49,6 @@ if __name__ == '__main__':
         video_src = 0
 
     cap = cv2.VideoCapture(video_src)
-    
 
     # Get the frame size. This will be used by the pose estimator.
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -54,6 +65,7 @@ if __name__ == '__main__':
 
     # Now, let the frames flow.
     while True:
+        start = time.time()
 
         # Read a frame.
         frame_got, frame = cap.read()
@@ -85,6 +97,15 @@ if __name__ == '__main__':
             marks[:, 0] += x1
             marks[:, 1] += y1
 
+            # (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["left_eye"]
+            # (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["right_eye"]
+
+            # leftEye = shape[self.lStart:self.lEnd]
+            # rightEye = shape[self.rStart:self.rEnd]
+
+            # leftEAR = eye_aspect_ratio(leftEye)
+            # rightEAR = eye_aspect_ratio(rightEye)
+
             # Try pose estimation with 68 points.
             pose = pose_estimator.solve_pose_by_68_points(marks)
 
@@ -114,8 +135,10 @@ if __name__ == '__main__':
 
             # Do you want to see the facebox?
             #mark_detector.draw_box(frame, [facebox])
+        
 
         # Show preview.
         cv2.imshow("Preview", frame)
         if cv2.waitKey(1) == 27:
             break
+        print(time.time() - start)
