@@ -23,7 +23,7 @@ from blink_detection import eye_aspect_ratio
 
 import time
 
-from imutils import face_utils, resize
+from database import db
 
 print(__doc__)
 print("OpenCV version: {}".format(cv2.__version__))
@@ -73,6 +73,13 @@ if __name__ == '__main__':
 
     # 4. Measure the performance with a tick meter.
     tm = cv2.TickMeter()
+
+    # Initialize variables sent to database every 5 seconds
+    poses = []
+    avg_time_eyes_closed = 0
+    avg_attention = 0
+    count = 0
+    last_sent = time.time()
 
     # Now, let the frames flow.
     while True:
@@ -151,7 +158,7 @@ if __name__ == '__main__':
             # Attention Thresholds
             face_left_right_threshold = 20
             face_up_threshold = 30
-            face_down_threshold = 0
+            face_down_threshold = 20
             attn_change = 0.5
             EAR_threshold = 0.2
 
@@ -200,6 +207,27 @@ if __name__ == '__main__':
         mark_detector.draw_text(frame, f'Attention: {attn:.2f}%', coords=(30,90))
         eyes_closed_text = f'{time_eyes_closed:.2f}s' if eyes_closed else ''
         mark_detector.draw_text(frame, f'Eyes Closed: {eyes_closed} {eyes_closed_text}', coords=(30,120))
+
+        poses.append(pose)
+        avg_attention += attn
+        avg_time_eyes_closed += time_eyes_closed
+        count +=1
+
+        # Save value every 5 seconds to database
+        time_now = time.time()
+        if time_now - last_sent > 5:
+            last_sent = time_now
+            # 
+            pose = poses[2]
+            avg_attention /= count
+            avg_time_eyes_closed /= count
+            print("Pushed to database")
+            db.child("Meeting102").child("metrics").push({"time":str(cur_time), "attention": avg_attention, "X pose": pose[0], "Y pose": pose[1], "Z pose": pose[2], "eyes_closed" : time_eyes_closed })
+            # Reset all variables
+            poses = []
+            avg_attention = 0
+            avg_time_eyes_closed = 0
+            count = 0
 
         attn_span = pd.concat([
             attn_span, 
