@@ -3,6 +3,7 @@ import cv2
 import numpy as np
 import tensorflow as tf
 from tensorflow import keras
+from imutils import face_utils, resize
 
 
 class FaceDetector:

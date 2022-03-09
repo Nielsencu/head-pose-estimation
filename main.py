@@ -127,8 +127,8 @@ if __name__ == '__main__':
 
             # leftEAR = eye_aspect_ratio(leftEye)
             # rightEAR = eye_aspect_ratio(rightEye)
-
             # Try pose estimation with 68 points.
+            print(marks.dtype)
             pose = pose_estimator.solve_pose_by_68_points(marks)
 
             # All done. The best way to show the result would be drawing the pose on the frame in realtime.
