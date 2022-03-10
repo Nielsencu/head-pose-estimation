@@ -68,6 +68,7 @@ predictor = dlib.shape_predictor(p)
 cap = cv2.VideoCapture(0)
 (lStart, lEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["left_eye"]
 (rStart, rEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["right_eye"]
+(mStart, mEnd) = face_utils.FACIAL_LANDMARKS_68_IDXS["mouth"]
 
 def shape_to_np(shape, dtype="f"):
 	# initialize the list of (x, y)-coordinates
@@ -85,6 +86,14 @@ def eye_aspect_ratio(eye):
     C = distance.euclidean(eye[0], eye[3])
     ear = (A + B) / (2.0 * C)
     return ear
+
+def mouth_aspect_ratio(mouth):
+    A = distance.euclidean(mouth[13], mouth[19])
+    B = distance.euclidean(mouth[14], mouth[18])
+    C = distance.euclidean(mouth[15], mouth[17])
+    D = distance.euclidean(mouth[12], mouth[16])
+    mar = (A + B + C) / (2.0 * D)
+    return mar
 
 if __name__ == '__main__':
     # Before estimation started, there are some startup works to do.
@@ -144,6 +153,7 @@ if __name__ == '__main__':
             attn = max(attn-0.1,0)
             looking_away = None
             eyes_closed = False
+            yawn = False
         else:
             # For each detected face, find the landmark.
             for (i, rect) in enumerate(rects):
@@ -197,6 +207,11 @@ if __name__ == '__main__':
                 eyes_closed = ear < EAR_threshold
                 print(f'LEFT: {left_EAR:.3f}, RIGHT: {right_EAR:.3f}, CLOSED: {eyes_closed}')
 
+                mouth = shape[mStart:mEnd]
+                mar = mouth_aspect_ratio(mouth)
+                yawn = mar > 0.3
+                print(f'YAWN: {mar}')
+
                 if eyes_closed:
                     if eyes_already_closed:
                         time_eyes_closed = time.time() - start_eyes_closed
@@ -233,6 +248,7 @@ if __name__ == '__main__':
         mark_detector.draw_text(frame, f'Attention: {attn:.2f}%', coords=(30,90))
         eyes_closed_text = f'{time_eyes_closed:.2f}s' if eyes_closed else ''
         mark_detector.draw_text(frame, f'Eyes Closed: {eyes_closed} {eyes_closed_text}', coords=(30,120))
+        mark_detector.draw_text(frame, f'Yawn: {yawn}', coords=(30,150))
 
         # poses.append(pose)
         # avg_attention += attn
@@ -244,7 +260,7 @@ if __name__ == '__main__':
         # if time_now - last_sent > 5:
         #     last_sent = time_now
         #     # 
-        #     pose = poses[2]
+        #     pose = poses[len(pose)//2]
         #     avg_attention /= count
         #     avg_time_eyes_closed /= count
         #     print("Pushed to database")

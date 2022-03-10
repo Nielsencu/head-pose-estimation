@@ -160,7 +160,7 @@ if __name__ == '__main__':
             face_up_threshold = 30
             face_down_threshold = 20
             attn_change = 0.5
-            EAR_threshold = 0.2
+            EAR_threshold = 0.25
 
             # Blink Detection
             left_EAR = eye_aspect_ratio(marks, LEFT_EYE_POINTS)
