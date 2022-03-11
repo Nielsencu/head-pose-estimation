@@ -11,8 +11,15 @@ firebaseConfig = {
   "measurementId": "G-7NW9BM2HG3"
 }
 
-firebase = pyrebase.initialize_app(firebaseConfig)
+class Database:
+  def __init__(self, meeting_name):
+    self.firebase = pyrebase.initialize_app(firebaseConfig)
+    self.db = self.firebase.database()
+    self.meeting_name = meeting_name
+    # auth=firebase.auth()
+    # storage=firebase.storage()
 
-db=firebase.database()
-# auth=firebase.auth()
-# storage=firebase.storage()
+  def send(self,message : dict):
+    self.db.child(self.meeting_name).child('metrics').push(message)
+    print('Pushed to database')
+

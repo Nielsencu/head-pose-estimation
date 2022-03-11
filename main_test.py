@@ -19,10 +19,13 @@ import matplotlib.pyplot as plt
 
 from imutils import face_utils
 import dlib
-# from database import db
 
 from src.pose_estimator import PoseEstimator
 from src.landmark_metrics import eye_aspect_ratio, mouth_aspect_ratio
+from src.database import Database
+from src.eyes import update_eyes
+from src.yawn import update_yawn
+from src.message import Message
 
 print(__doc__)
 print('OpenCV version: {}'.format(cv2.__version__))
@@ -46,6 +49,10 @@ looking_away = None
 # Blink Detection
 eyes_closed, eyes_already_closed = False, False
 start_eyes_closed, time_eyes_closed = 0, 0
+
+# Yawn detection
+mouth_open, mouth_already_open = False, False
+start_mouth_open, time_mouth_open = 0, 0
 
 # Landmarks Detection
 pretrained_landmarks = r'assets/shape_predictor_68_face_landmarks.dat'
@@ -74,6 +81,9 @@ if __name__ == '__main__':
         video_src = 0
 
     cap = cv2.VideoCapture(video_src)
+    if not cap.isOpened():
+        print("Canot open camera")
+        exit()
 
     # Get the frame size. This will be used by the pose estimator.
     width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
@@ -85,9 +95,17 @@ if __name__ == '__main__':
     # Initialize variables sent to database every 5 seconds
     poses = []
     avg_time_eyes_closed = 0
+    avg_time_mouth_open = 0
     avg_attention = 0
     count = 0
+    yawn_duration = 0
     last_sent = time.time()
+
+    # Initialize database connection
+    db = Database('Meeting102')
+
+    # Initialize real-time message sent to database
+    message = Message()
 
     detector = dlib.get_frontal_face_detector()
 
@@ -116,6 +134,7 @@ if __name__ == '__main__':
             looking_away = None
             eyes_closed = False
             yawn = False
+            pose = None
         else:
             # For each detected face, find the landmarks
             for (i, rect) in enumerate(rects):
@@ -170,22 +189,12 @@ if __name__ == '__main__':
                 # Mouth Aspect Ratio (MAR)
                 mouth = shape[mouth_start:mouth_end]
                 MAR = mouth_aspect_ratio(mouth)
-                yawn = MAR > 0.3
+                mouth_open = MAR > 0.3
                 print(f'YAWN: {MAR}')
 
-                # Check how long eyes have been closed
-                if eyes_closed:
-                    if eyes_already_closed:
-                        time_eyes_closed = time.time() - start_eyes_closed
-                    else:
-                        start_eyes_closed = time.time()
-                        eyes_already_closed = True
-                else: # eyes opened
-                    if eyes_already_closed:
-                        eyes_already_closed = False
-                        time_eyes_closed = time.time() - start_eyes_closed
-                    else: # eyes not already closed
-                        time_eyes_closed = 0
+                time_eyes_closed, start_eyes_closed, eyes_already_closed = update_eyes(eyes_closed, time_eyes_closed, eyes_already_closed, start_eyes_closed)
+
+                time_mouth_open, start_mouth_open, mouth_already_open = update_yawn(mouth_open, time_mouth_open, mouth_already_open, start_mouth_open)
 
                 # Add/Deduct Attention based on the thresholds
                 if (-face_left_right_threshold < pose[0] < face_left_right_threshold) \
@@ -211,27 +220,22 @@ if __name__ == '__main__':
         draw_text(frame, f'Attention: {attn:.2f}%', coords=(30,90))
         eyes_closed_text = f'{time_eyes_closed:.2f}s' if eyes_closed else ''
         draw_text(frame, f'Eyes Closed: {eyes_closed} {eyes_closed_text}', coords=(30,120))
-        draw_text(frame, f'Yawn: {yawn}', coords=(30,150))
+        mouth_opened_text = f'{time_mouth_open:.2f}s' if mouth_open else ''
+        draw_text(frame, f'Yawn: {mouth_open} {mouth_opened_text}', coords=(30,150))
 
-        # poses.append(pose)
-        # avg_attention += attn
-        # avg_time_eyes_closed += time_eyes_closed
-        # count +=1
+        # Update message
+        message.update(pose, attn, time_eyes_closed, time_mouth_open)
 
-        # # Save value every 5 seconds to database
-        # time_now = time.time()
-        # if time_now - last_sent > 5:
-        #     last_sent = time_now
-        #     pose = poses[len(pose)//2]
-        #     avg_attention /= count
-        #     avg_time_eyes_closed /= count
-        #     print('Pushed to database')
-        #     db.child('Meeting102').child('metrics').push({'time':str(cur_time), 'attention': avg_attention, 'X pose': pose[0], 'Y pose': pose[1], 'Z pose': pose[2], 'eyes_closed' : time_eyes_closed })
-        #     # Reset all variables
-        #     poses = []
-        #     avg_attention = 0
-        #     avg_time_eyes_closed = 0
-        #     count = 0
+        # Save value every 5 seconds to database
+        time_now = time.time()
+        if time_now - last_sent > 5:
+            last_sent = time_now
+            # Finalize message by taking average, or median for pose
+            message.finalize(cur_time)
+            # Send message to database
+            db.send(message.as_dict())
+            # Reset all variables in message
+            message.reset()
 
         attn_span = pd.concat([
             attn_span,
