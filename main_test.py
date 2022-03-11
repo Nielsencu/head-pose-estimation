@@ -1,4 +1,4 @@
-"""Human Head Pose Estimation Demo
+'''Human Head Pose Estimation Demo
 
 1. Detect human face in the video frame.
 2. Run facial landmark detection on the face image.
@@ -6,7 +6,7 @@
 
 To find more details, please refer to:
 https://github.com/yinguobing/head-pose-estimation
-"""
+'''
 
 from argparse import ArgumentParser
 import math
@@ -21,18 +21,18 @@ from imutils import face_utils
 import dlib
 # from database import db
 
-from pose_estimator import PoseEstimator
-from landmark_metrics import eye_aspect_ratio, mouth_aspect_ratio
+from src.pose_estimator import PoseEstimator
+from src.landmark_metrics import eye_aspect_ratio, mouth_aspect_ratio
 
 print(__doc__)
-print("OpenCV version: {}".format(cv2.__version__))
+print('OpenCV version: {}'.format(cv2.__version__))
 
 # Parse arguments from user input
 parser = ArgumentParser()
-parser.add_argument("--video", type=str, default=None,
-                    help="Video file to be processed.")
-parser.add_argument("--cam", type=int, default=None,
-                    help="The webcam index.")
+parser.add_argument('--video', type=str, default=None,
+                    help='Video file to be processed.')
+parser.add_argument('--cam', type=int, default=None,
+                    help='The webcam index.')
 args = parser.parse_args()
 
 # FPS
@@ -48,13 +48,13 @@ eyes_closed, eyes_already_closed = False, False
 start_eyes_closed, time_eyes_closed = 0, 0
 
 # Landmarks Detection
-pretrained_landmarks = r"assets/shape_predictor_68_face_landmarks.dat"
+pretrained_landmarks = r'assets/shape_predictor_68_face_landmarks.dat'
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor(pretrained_landmarks)
 
-(left_eye_start, left_eye_end) = face_utils.FACIAL_LANDMARKS_68_IDXS["left_eye"]
-(right_eye_start, right_eye_end) = face_utils.FACIAL_LANDMARKS_68_IDXS["right_eye"]
-(mouth_start, mouth_end) = face_utils.FACIAL_LANDMARKS_68_IDXS["mouth"]
+(left_eye_start, left_eye_end) = face_utils.FACIAL_LANDMARKS_68_IDXS['left_eye']
+(right_eye_start, right_eye_end) = face_utils.FACIAL_LANDMARKS_68_IDXS['right_eye']
+(mouth_start, mouth_end) = face_utils.FACIAL_LANDMARKS_68_IDXS['mouth']
 
 def draw_text(image, label, coords=(50,50)):
     cv2.putText(
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     # Setup the video source from webcam or video file
     video_src = args.cam if args.cam is not None else args.video
     if video_src is None:
-        print("Video source not assigned, default webcam will be used")
+        print('Video source not assigned, default webcam will be used')
         video_src = 0
 
     cap = cv2.VideoCapture(video_src)
@@ -225,8 +225,8 @@ if __name__ == '__main__':
         #     pose = poses[len(pose)//2]
         #     avg_attention /= count
         #     avg_time_eyes_closed /= count
-        #     print("Pushed to database")
-        #     db.child("Meeting102").child("metrics").push({"time":str(cur_time), "attention": avg_attention, "X pose": pose[0], "Y pose": pose[1], "Z pose": pose[2], "eyes_closed" : time_eyes_closed })
+        #     print('Pushed to database')
+        #     db.child('Meeting102').child('metrics').push({'time':str(cur_time), 'attention': avg_attention, 'X pose': pose[0], 'Y pose': pose[1], 'Z pose': pose[2], 'eyes_closed' : time_eyes_closed })
         #     # Reset all variables
         #     poses = []
         #     avg_attention = 0
@@ -256,7 +256,7 @@ cv2.destroyAllWindows()
 # Save results into CSV and plot graphs
 attn_span['timestamp'] = pd.to_datetime(attn_span['timestamp'])
 attn_span = attn_span.set_index('timestamp')
-# attn_span.to_csv('attn.csv', index=True) # Temporarily avoid saving to csv
+# attn_span.to_csv(r'assets/attn.csv', index=True) # Temporarily avoid saving to csv
 attn_span['attention'].plot.line(label='Attention (%)', legend=True)
 attn_span['eyes_closed'].plot.line(label='Eyes Closed (s)', secondary_y=True, legend=True)
 plt.show()
