@@ -199,7 +199,8 @@ if __name__ == '__main__':
                 # Add/Deduct Attention based on the thresholds
                 if (-face_left_right_threshold < pose[0] < face_left_right_threshold) \
                     and (-face_down_threshold < pose[1] < face_up_threshold) \
-                    and time_eyes_closed < 2:
+                    and time_eyes_closed < 2 \
+                    and time_mouth_open < 1:
                     attn = min(100, attn + attn_change / 2)
                     looking_away = False
                 else:
