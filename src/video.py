@@ -16,3 +16,6 @@ class Camera:
         if isinstance(self.video_src,int):
             frame = cv2.flip(frame, 2)
         return frame_got, frame
+
+    def release(self):
+        self.cap.release()
