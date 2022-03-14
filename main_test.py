@@ -143,8 +143,8 @@ if __name__ == '__main__':
                 shape = np.array([(shape.part(i).x, shape.part(i).y) for i in range(68)], dtype='f')
 
                 # Draw all landmark (x,y) coordinate points
-                for (x, y) in shape:
-                    cv2.circle(frame, (int(x), int(y)), 2, (0, 255, 0), -1)
+                #for (x, y) in shape:
+                #    cv2.circle(frame, (int(x), int(y)), 2, (0, 255, 0), -1)
 
                 # Estimate pose using the 68 facial landmarks
                 pose = pose_estimator.solve_pose_by_68_points(shape)

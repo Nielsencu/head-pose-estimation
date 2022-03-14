@@ -1,25 +1,15 @@
-import pyrebase
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import firestore 
 
-firebaseConfig = {
-  "apiKey": "AIzaSyCm8f6gJtK3zvxrXrwg4zMpaRQNmTiZ7UQ",
-  "authDomain": "attentionindex.firebaseapp.com",
-  "databaseURL": "https://attentionindex-default-rtdb.firebaseio.com",
-  "projectId": "attentionindex",
-  "storageBucket": "attentionindex.appspot.com",
-  "messagingSenderId": "921432105624",
-  "appId": "1:921432105624:web:ad22c868065f717e6e26ed",
-  "measurementId": "G-7NW9BM2HG3"
-}
-
+cred = credentials.Certificate("../attentionindex-firebase-adminsdk-x5zeb-0f8634b6b9.json")
 class Database:
   def __init__(self, meeting_name):
-    self.firebase = pyrebase.initialize_app(firebaseConfig)
-    self.db = self.firebase.database()
+    self.firebase = firebase_admin.initialize_app(cred)
+    self.db = firebase_admin.firestore.client(app = self.firebase)
     self.meeting_name = meeting_name
-    # auth=firebase.auth()
-    # storage=firebase.storage()
 
   def send(self,message : dict):
-    self.db.child(self.meeting_name).child('metrics').push(message)
+    self.db.collection(self.meeting_name).add(message)
     print('Pushed to database')
 
