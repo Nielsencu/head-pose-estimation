@@ -26,6 +26,7 @@ from src.database import Database
 from src.eyes import update_eyes
 from src.yawn import update_yawn
 from src.message import Message
+from src.video import Camera
 
 print(__doc__)
 print('OpenCV version: {}'.format(cv2.__version__))
@@ -76,18 +77,11 @@ def draw_text(image, label, coords=(50,50)):
 if __name__ == '__main__':
     # Setup the video source from webcam or video file
     video_src = args.cam if args.cam is not None else args.video
-    if video_src is None:
-        print('Video source not assigned, default webcam will be used')
-        video_src = 0
 
-    cap = cv2.VideoCapture(video_src)
-    if not cap.isOpened():
-        print("Canot open camera")
-        exit()
+    cap = Camera(video_src)
 
     # Get the frame size. This will be used by the pose estimator.
-    width = cap.get(cv2.CAP_PROP_FRAME_WIDTH)
-    height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+    width, height = cap.get_frame_size()
 
     # Initialize pose estimator
     pose_estimator = PoseEstimator(img_size=(height, width))
@@ -113,13 +107,9 @@ if __name__ == '__main__':
         start = time.time()
 
         # Read a frame
-        frame_got, frame = cap.read()
+        frame_got, frame = cap.get_frame()
         if frame_got is False:
             break
-
-        # If the frame comes from webcam, flip it so it looks like a mirror
-        if video_src == 0:
-            frame = cv2.flip(frame, 2)
 
         # Converting the image to grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
