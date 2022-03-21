@@ -26,6 +26,16 @@ This repository already provided a pre-trained model for facial landmarks detect
 git clone --depth=1 https://github.com/yinguobing/head-pose-estimation.git
 ```
 
+Add firebase access key file here: 
+```bash
+head-pose-estimation\src\attentionindex-firebase-adminsdk-x5zeb-0f8634b6b9.json
+```
+
+Add Shape predictor .dat file here: 
+```bash
+head-pose-estimation\assets\shape_predictor_68_face_landmarks.dat
+```
+
 ## Running
 
 A video file or a webcam index should be assigned through arguments. If no source provided, the built in webcam will be used by default.
@@ -35,7 +45,7 @@ A video file or a webcam index should be assigned through arguments. If no sourc
 For any video format that OpenCV supports (`mp4`, `avi` etc.):
 
 ```bash
-python3 main.py --video /path/to/video.mp4
+python3 main_test.py --video /path/to/video.mp4
 ```
 
 ### With webcam
@@ -43,7 +53,7 @@ python3 main.py --video /path/to/video.mp4
 The webcam index should be provided:
 
 ```bash
-python3 main.py --cam 0
+python3 main_test.py --cam 0
 ``` 
 
 ## How it works

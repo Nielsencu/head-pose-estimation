@@ -2,7 +2,7 @@ import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import firestore 
 
-cred = credentials.Certificate("../attentionindex-firebase-adminsdk-x5zeb-0f8634b6b9.json")
+cred = credentials.Certificate("../head-pose-estimation/src/attentionindex-firebase-adminsdk-x5zeb-0f8634b6b9.json")
 class Database:
   def __init__(self, meeting_name):
     self.firebase = firebase_admin.initialize_app(cred)

@@ -1,5 +1,6 @@
 attn.csv
 *.dat
+src/attentionindex-firebase-adminsdk-x5zeb-0f8634b6b9.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

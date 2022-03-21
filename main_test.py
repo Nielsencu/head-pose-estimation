@@ -96,7 +96,7 @@ if __name__ == '__main__':
     last_sent = time.time()
 
     # Initialize database connection
-    db = Database('Meeting102')
+    db = Database('Meeting104')
 
     # Initialize real-time message sent to database
     message = Message()
