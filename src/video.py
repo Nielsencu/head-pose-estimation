@@ -1,8 +1,9 @@
 import cv2
 
 class Camera:
-    def __init__(self, video_source):
-        if video_source is None:
+    def __init__(self, video_src):
+        self.video_src = video_src
+        if self.video_src is None:
             print('Video source not assigned, default webcam will be used')
             self.video_src = 0
         self.cap = cv2.VideoCapture(self.video_src)

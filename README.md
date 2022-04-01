@@ -1,85 +1,54 @@
-# Head pose estimation
+# Attention Indexing Model
 
-Real time human head pose estimation using TensorFlow and OpenCV.
+Real-time attention tracking using various metrics such as head pose estimation and blink and yawn detection using OpenCV and dlib. The head pose estimation model was originally forked from yinguobing's [head pose estimation repo](https://github.com/yinguobing/head-pose-estimation) which used Tensorflow to obtain the facial landmarks. However, we decided to use dlib's implementation instead for speed and less bloat. 
 
 ![demo](doc/demo.gif)
 ![demo](doc/demo1.gif)
 
 ## Getting Started
 
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
-
-### Prerequisites
-
-![TensorFlow](https://img.shields.io/badge/TensorFlow-v2.4-brightgreen)
-![OpenCV](https://img.shields.io/badge/OpenCV-v4.5-brightgreen)
-![Numpy](https://img.shields.io/badge/Numpy-v1.19-brightgreen)
-
-The code was tested on Ubuntu 20.04 and macOS Big Sur.
-
-### Installing
-
-This repository already provided a pre-trained model for facial landmarks detection. Just git clone then you are good to go.
-
+Git clone this repo into your local machine. 
 ```bash
-# From your favorite development directory:
-git clone --depth=1 https://github.com/yinguobing/head-pose-estimation.git
+git clone --depth=1 https://github.com/Nielsencu/ripplecreate-attention-model.git
+```
+
+For the Python version, `python==3.9` was used during testing but `python>=3.7` should work as well. 
+
+Preferrably, use Anaconda and install the packages into a conda environment. This is because `dlib` can be troublesome to install using a standard Python installation. 
+```bash
+pip install -r requirements.txt
 ```
 
 ## Running
 
-A video file or a webcam index should be assigned through arguments. If no source provided, the built in webcam will be used by default.
+A video file or a webcam index should be assigned through arguments. If no source isprovided, the built-in webcam will be used by default.
 
-### With video file
+### With Video File
 
-For any video format that OpenCV supports (`mp4`, `avi` etc.):
-
+Works with any video format that OpenCV supports (`mp4`, `avi`, etc.):
 ```bash
 python3 main.py --video /path/to/video.mp4
 ```
 
-### With webcam
+### With Webcam
 
-The webcam index should be provided:
-
+The webcam index (to account for multiple webcams) should be provided:
 ```bash
 python3 main.py --cam 0
-``` 
+```
 
-## How it works
+## How It Works
 
-There are three major steps:
-
-1. Face detection. A face detector is introduced to provide a face bounding box containing a human face. Then the face box is expanded and transformed to a square to suit the needs of later steps.
-
-2. Facial landmark detection. A pre-trained deep learning model take the face image as input and output 68 facial landmarks.
-
-3. Pose estimation. After getting 68 facial landmarks, the pose could be calculated by a mutual PnP algorithm.
-
-## Retrain the model
-
-To retrain the facial landmark detection model, please refer to this series of [posts](https://yinguobing.com/deeplearning/) (in Chinese only). The training code is also open sourced: https://github.com/yinguobing/cnn-facial-landmark
-
+1. Facial Landmark Detection. A non-deep-learning pre-trained predictor called `shape_predictor_68_face_landmarks.dat` takes in faces it find as inputs and outputs a set of 68 facial landmarks for each face found.
+2. Pose Estimation. Using the 68 facial landmarks, the pose can be calculated by a mutual PnP algorithm. 
+3. Blink Detection. Using the 68 facial landmarks, the blink rate and amount of time the eyes are closed can be calculated using a few of the landmarks. 
+4. Yawn Detection. Using the 68 facial landmarks, a person's yawn can be calculated using a few of the landmarks. 
+5. The scores collected will then be sent to a database for storage and dashboarding. 
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
-## Authors
-Yin Guobing (尹国冰) - [yinguobing](https://yinguobing.com)
-
-![](doc/wechat_logo.png)
-
 ## Acknowledgments
-The pre-trained TensorFlow model file is trained with various public data sets which have their own licenses. Please refer to them before using this code.
+The 3D face model comes from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
 
-- 300-W: https://ibug.doc.ic.ac.uk/resources/300-W/
-- 300-VW: https://ibug.doc.ic.ac.uk/resources/300-VW/
-- LFPW: https://neerajkumar.org/databases/lfpw/
-- HELEN: http://www.ifp.illinois.edu/~vuongle2/helen/
-- AFW: https://www.ics.uci.edu/~xzhu/face/
-- IBUG: https://ibug.doc.ic.ac.uk/resources/facial-point-annotations/
-
-The 3D model of face comes from OpenFace, you can find the original file [here](https://github.com/TadasBaltrusaitis/OpenFace/blob/master/lib/local/LandmarkDetector/model/pdms/In-the-wild_aligned_PDM_68.txt).
-
-The build in face detector comes from OpenCV. 
-https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector
+The built-in face detector comes from OpenCV, you can find the repo [here](https://github.com/opencv/opencv/tree/master/samples/dnn/face_detector). 

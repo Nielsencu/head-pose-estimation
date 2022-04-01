@@ -1,4 +1,5 @@
 class Message:
+    '''Sends model data to firestore database'''
     def __init__(self):
         self.poses = []
         self.avg_attention = 0
