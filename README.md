@@ -14,7 +14,7 @@ git clone --depth=1 https://github.com/Nielsencu/ripplecreate-attention-model.gi
 
 For the Python version, `python==3.9` was used during testing but `python>=3.7` should work as well. 
 
-Preferrably, use Anaconda and install the packages into a conda environment. This is because `dlib` can be troublesome to install using a standard Python installation. 
+Preferably, use Anaconda and install the packages into a conda environment. This is because `dlib` can be troublesome to install using a standard Python installation. 
 ```bash
 pip install -r requirements.txt
 ```
